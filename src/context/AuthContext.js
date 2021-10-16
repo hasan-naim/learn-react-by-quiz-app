@@ -9,7 +9,6 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import "../firebase";
 
-// creating Authcontext
 const AuthContext = React.createContext();
 
 export function useAuth() {
@@ -22,16 +21,15 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const auth = getAuth();
-    const unSubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
     });
 
-    return unSubscribe;
+    return unsubscribe;
   }, []);
 
-  //signup function
-
+  // signup function
   async function signup(email, password, username) {
     const auth = getAuth();
     await createUserWithEmailAndPassword(auth, email, password);
@@ -41,22 +39,19 @@ export function AuthProvider({ children }) {
       displayName: username,
     });
 
-    //set current user
-
     const user = auth.currentUser;
     setCurrentUser({
       ...user,
     });
   }
 
-  //login function
-
+  // login function
   function login(email, password) {
     const auth = getAuth();
     return signInWithEmailAndPassword(auth, email, password);
   }
 
-  //logout functin
+  // logout function
   function logout() {
     const auth = getAuth();
     return signOut(auth);
