@@ -14,8 +14,8 @@ export default function Videos() {
         <InfiniteScroll
           dataLength={videos.length}
           hasMore={hasMore}
+          loader="Loading..."
           next={() => setPage(page + 8)}
-          loader={<h4>Loading...</h4>}
         >
           {videos.map((video) =>
             video.noq > 0 ? (

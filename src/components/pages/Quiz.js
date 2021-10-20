@@ -1,7 +1,7 @@
-import { getDatabase, ref, set } from "@firebase/database";
+import { getDatabase, ref, set } from "firebase/database";
 import _ from "lodash";
 import { useEffect, useReducer, useState } from "react";
-import { useHistory, useParams } from "react-router";
+import { useHistory, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import useQuestions from "../../hooks/useQuestions";
 import Answers from "../Answers";
@@ -23,6 +23,7 @@ const reducer = (state, action) => {
       const questions = _.cloneDeep(state);
       questions[action.questionID].options[action.optionIndex].checked =
         action.value;
+
       return questions;
     default:
       return state;
@@ -36,7 +37,6 @@ export default function Quiz() {
 
   const [qna, dispatch] = useReducer(reducer, initialState);
   const { currentUser } = useAuth();
-
   const history = useHistory();
 
   useEffect(() => {
@@ -46,38 +46,33 @@ export default function Quiz() {
     });
   }, [questions]);
 
-  function handleAnswerChange(event, index) {
+  function handleAnswerChange(e, index) {
     dispatch({
       type: "answer",
       questionID: currentQuestion,
       optionIndex: index,
-      value: event.target.checked,
+      value: e.target.checked,
     });
   }
 
-  // what will happen when user clicks next question button
-  // => if there is questions left we will show next question
-  // => or there is no question left then we will redirect him/her to the result page
+  // handle when user clicks the next button to get the next question
   function nextQuestion() {
     if (currentQuestion + 1 < questions.length) {
       setCurrentQuestion((prevCurrent) => prevCurrent + 1);
     }
   }
 
-  // what will happen when user clicks previous question button
-  // => if it is not the first question then we will redirect to the previous question
-
+  // handle when user clicks the prev button to get back to the previous question
   function prevQuestion() {
     if (currentQuestion >= 1 && currentQuestion <= questions.length) {
       setCurrentQuestion((prevCurrent) => prevCurrent - 1);
     }
   }
 
-  // what will happen when user enter the last question
-  // => we will change the button text, next to submit
-
+  // submit quiz
   async function submit() {
     const { uid } = currentUser;
+
     const db = getDatabase();
     const resultRef = ref(db, `result/${uid}`);
 
@@ -93,23 +88,20 @@ export default function Quiz() {
     });
   }
 
-  // calculate percentage of progress bar
-
+  // calculate percentage of progress
   const percentage =
     questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
 
   return (
     <>
-      {console.log(currentUser)}
-      {loading && <div>Loading...</div>}
-      {error && <div>There is an error...</div>}
-      {!error && !loading && qna && qna.length > 0 && (
+      {loading && <div>Loading ...</div>}
+      {error && <div>There was an error!</div>}
+      {!loading && !error && qna && qna.length > 0 && (
         <>
           <h1>{qna[currentQuestion].title}</h1>
           <h4>Question can have multiple answers</h4>
-
           <Answers
-            input={true}
+            input
             options={qna[currentQuestion].options}
             handleChange={handleAnswerChange}
           />
